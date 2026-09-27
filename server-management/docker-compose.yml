@@ -71,7 +71,9 @@ services:
       EULA: "TRUE"
       TYPE: "PAPER"
 
-      # VERSION is unset on purpose: always run the newest stable Paper release.
+      VERSION: "26.3"
+      # Allow Paper builds from the experimental channel (default: stable only).
+      PAPER_CHANNEL: "experimental"
 
       MEMORY: "8G"
       # GC tuning recommended for Paper (https://docs.papermc.io/paper/aikars-flags).
