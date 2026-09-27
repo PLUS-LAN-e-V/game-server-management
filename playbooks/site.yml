@@ -1,0 +1,5 @@
+- name: Configure plus LAN server
+  hosts: lan_servers
+  roles:
+    - common
+    - docker

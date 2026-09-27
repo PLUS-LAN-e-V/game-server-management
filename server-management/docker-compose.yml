@@ -1,0 +1,200 @@
+name: plus-lan
+
+services:
+
+  # ============================================================
+  # Counter-Strike 2 - Server 1
+  # ============================================================
+
+  cs2-01:
+    image: ghcr.io/gameservermanagers/gameserver:cs2
+    container_name: pluslan-cs2-01
+    restart: unless-stopped
+
+    ports:
+      - "27015:27015/tcp"
+      - "27015:27015/udp"
+      - "27005:27005/udp"
+      - "27020:27020/udp"
+
+    # RCON is TCP on the game port (27015/tcp above); enabled via cs2/cs2server.cfg.
+    secrets:
+      - cs2_rcon_password
+
+    volumes:
+      - ./data/cs2-01:/data
+      - ./cs2/cs2server.cfg:/data/config-lgsm/cs2server/cs2server.cfg:ro
+
+
+  # ============================================================
+  # Counter-Strike 2 - Server 2
+  # ============================================================
+
+  cs2-02:
+    image: ghcr.io/gameservermanagers/gameserver:cs2
+    container_name: pluslan-cs2-02
+    restart: unless-stopped
+
+    ports:
+      - "27016:27015/tcp"
+      - "27016:27015/udp"
+      - "27006:27005/udp"
+      - "27021:27020/udp"
+
+    # RCON: host port 27016/tcp.
+    secrets:
+      - cs2_rcon_password
+
+    volumes:
+      - ./data/cs2-02:/data
+      - ./cs2/cs2server.cfg:/data/config-lgsm/cs2server/cs2server.cfg:ro
+
+
+  # ============================================================
+  # Minecraft - PaperMC
+  # ============================================================
+
+  minecraft:
+    image: itzg/minecraft-server:latest
+    container_name: pluslan-minecraft
+    restart: unless-stopped
+
+    tty: true
+    stdin_open: true
+
+    ports:
+      - "25565:25565"
+      # BlueMap web map: http://<server>:8100
+      - "8100:8100"
+
+    environment:
+      EULA: "TRUE"
+      TYPE: "PAPER"
+
+      # VERSION is unset on purpose: always run the newest stable Paper release.
+
+      MEMORY: "8G"
+      # GC tuning recommended for Paper (https://docs.papermc.io/paper/aikars-flags).
+      USE_AIKAR_FLAGS: "TRUE"
+
+      # Plugins downloaded from Modrinth on startup. The trailing "?" marks a plugin
+      # optional: if it doesn't support a new Minecraft release yet, it is skipped
+      # instead of blocking server startup.
+      MODRINTH_PROJECTS: "bluemap?"
+
+      SERVER_NAME: "PLUS-LAN Minecraft"
+      MOTD: "PLUS-LAN Persistent World"
+      MAX_PLAYERS: "40"
+
+      ENABLE_RCON: "TRUE"
+      RCON_PASSWORD: "${MINECRAFT_RCON_PASSWORD}"
+
+      ENABLE_WHITELIST: "FALSE"
+
+    volumes:
+      - ./data/minecraft:/data
+      # accept-download: true, BlueMap needs the Minecraft client textures to render.
+      - ./minecraft/bluemap/core.conf:/data/plugins/BlueMap/core.conf:ro
+
+
+  # ============================================================
+  # Satisfactory
+  # ============================================================
+
+  satisfactory:
+    image: wolveix/satisfactory-server:latest
+    container_name: pluslan-satisfactory
+    hostname: pluslan-satisfactory
+    restart: unless-stopped
+
+    ports:
+      - "7777:7777/tcp"
+      - "7777:7777/udp"
+      - "8888:8888/tcp"
+
+    environment:
+      MAXPLAYERS: "8"
+
+      PUID: "1000"
+      PGID: "1000"
+
+      STEAMBETA: "false"
+
+    volumes:
+      - ./data/satisfactory:/config
+
+    deploy:
+      resources:
+        limits:
+          memory: 12G
+        reservations:
+          memory: 4G
+
+
+  # ============================================================
+  # Factorio
+  # ============================================================
+
+  factorio:
+    # "stable" matches what players' clients run by default; "latest" can be an experimental build.
+    image: factoriotools/factorio:stable
+    container_name: pluslan-factorio
+    restart: unless-stopped
+
+    environment:
+      # The entrypoint chowns /factorio to PUID:PGID, including the mounted settings file,
+      # so use the host's first user (same as Satisfactory) to keep the repo file editable.
+      PUID: "1000"
+      PGID: "1000"
+
+      # With Space Age enabled every player needs the DLC; set "false" for base game only.
+      DLC_SPACE_AGE: "true"
+
+    ports:
+      - "34197:34197/udp"
+
+      # Factorio RCON.
+      # Different host port because CS2 already uses 27015.
+      - "27030:27015/tcp"
+
+    # RCON password is generated on first start: data/factorio/config/rconpw
+    volumes:
+      - ./data/factorio:/factorio
+      # Not :ro: the entrypoint's chown would fail on a read-only mount and abort startup.
+      - ./factorio/server-settings.json:/factorio/config/server-settings.json
+
+
+  # ============================================================
+  # Backup coordinator (Minecraft, Factorio, Satisfactory)
+  #
+  # Hourly at the full hour, skipped while nobody played. Keeps every backup from the
+  # last 24h plus one per older day. Log: backups/backup.log. Details: backup/backup.sh
+  # ============================================================
+
+  backup:
+    # Only used as a toolbox (bash, tar, rcon-cli, GNU date); our script replaces its
+    # Minecraft-only backup loop.
+    image: itzg/mc-backup:latest
+    container_name: pluslan-backup
+    restart: unless-stopped
+
+    entrypoint: ["bash", "/backup.sh"]
+
+    environment:
+      # Day boundaries for retention and timestamps in file names / log.
+      TZ: "Europe/Berlin"
+      BACKUP_INTERVAL_MINUTES: "60"
+      INITIAL_DELAY: "5m"
+      MINECRAFT_RCON_PASSWORD: "${MINECRAFT_RCON_PASSWORD}"
+
+    volumes:
+      - ./backup/backup.sh:/backup.sh:ro
+      - ./data/minecraft:/data/minecraft:ro
+      - ./data/factorio:/data/factorio:ro
+      - ./data/satisfactory:/data/satisfactory:ro
+      - ./backups:/backups
+
+
+secrets:
+  cs2_rcon_password:
+    environment: CS2_RCON_PASSWORD

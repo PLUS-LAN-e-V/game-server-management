@@ -1,0 +1,15 @@
+# Post-converge checks run by tests/run.sh. Assert the end state, not how it got there.
+- name: Verify plus LAN server
+  hosts: lan_servers
+  tasks:
+    - name: Check docker service is active
+      ansible.builtin.command: systemctl is-active docker
+      changed_when: false
+
+    - name: Check docker compose plugin works
+      ansible.builtin.command: docker compose version
+      changed_when: false
+
+    - name: Run a container
+      ansible.builtin.command: docker run --rm hello-world
+      changed_when: false

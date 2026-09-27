@@ -1,0 +1,10 @@
+common_packages:
+  - ca-certificates
+  - curl
+  - git
+  - htop
+  - unzip
+  - vim
+
+# Run a full `apt dist-upgrade` on every play.
+common_apt_upgrade: false

@@ -1,0 +1,2 @@
+# Login users that may run docker without sudo.
+docker_users: []
