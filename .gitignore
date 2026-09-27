@@ -1,0 +1,11 @@
+*.retry
+.DS_Store
+
+# Local secrets. Keep the checked-in template, never local environment files.
+**/.env
+**/.env.*
+!**/.env.example
+
+# Runtime state and generated backups from Compose services.
+**/data/
+**/backups/
