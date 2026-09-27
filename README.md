@@ -40,7 +40,7 @@ On the Ubuntu server, with this repo checked out:
 
 ```sh
 sudo ./bootstrap.sh   # installs Ansible from the official PPA
-make apply            # runs the local playbook as root
+make apply            # runs the local playbook as root via sudo
 ```
 
 `make check` does a dry run (`--check --diff`).
