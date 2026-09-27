@@ -24,11 +24,11 @@ explicitly; the installer installs Git when needed, clones into `/opt/plus-lan-s
 runs `bootstrap.sh`.
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh \
-    | sudo bash -s -- https://github.com/<owner>/<repo>.git
+curl -fsSL https://raw.githubusercontent.com/PLUS-LAN-e-V/game-server-management/main/install.sh \
+    | sudo bash -s -- https://github.com/PLUS-LAN-e-V/game-server-management.git
 
-wget -qO- https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh \
-    | sudo bash -s -- https://github.com/<owner>/<repo>.git
+wget -qO- https://raw.githubusercontent.com/PLUS-LAN-e-V/game-server-management/main/install.sh \
+    | sudo bash -s -- https://github.com/PLUS-LAN-e-V/game-server-management.git
 ```
 
 The install directory and Git ref can be overridden with `INSTALL_DIR` and `REPO_REF`. The
