@@ -10,9 +10,7 @@ test-all:
 
 # On the server itself (after sudo ./bootstrap.sh):
 apply:
-	sudo -v
-	ansible-playbook playbooks/site.yml
+	sudo ansible-playbook playbooks/site.yml --become=false
 
 check:
-	sudo -v
-	ansible-playbook playbooks/site.yml --check --diff
+	sudo ansible-playbook playbooks/site.yml --become=false --check --diff
