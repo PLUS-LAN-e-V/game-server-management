@@ -10,7 +10,9 @@ test-all:
 
 # On the server itself (after sudo ./bootstrap.sh):
 apply:
-	ansible-playbook playbooks/site.yml --ask-become-pass
+	sudo -v
+	ansible-playbook playbooks/site.yml
 
 check:
-	ansible-playbook playbooks/site.yml --ask-become-pass --check --diff
+	sudo -v
+	ansible-playbook playbooks/site.yml --check --diff
