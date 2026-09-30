@@ -8,7 +8,7 @@ set up by Ansible first; see the [top-level README](../README.md).
 On the server, in this directory:
 
 ```bash
-cp .env.example .env    # then fill in both passwords (letters and digits only)
+cp .env.example .env    # then fill in the passwords (letters and digits only) and the factorio.com login
 docker compose up -d
 ```
 
@@ -65,12 +65,23 @@ the newest stable Paper release. Players need a matching client version.
 - **Settings:** `factorio/server-settings.json` is mounted as the server config: LAN
   visibility only (public listing would need factorio.com credentials), name, autosaves, etc.
   Restart the service after changing it.
-- **Space Age:** `DLC_SPACE_AGE: "true"` in `docker-compose.yml` means every player needs the
-  DLC. Set it to `"false"` for base game only.
+- **Mods:** [Nullius](https://mods.factorio.com/mod/nullius) (overhaul) and
+  [Far Reach](https://mods.factorio.com/mod/far-reach). `factorio/mod-list.json` lists them
+  together with Nullius' required dependencies, because the download does not resolve
+  dependencies. On every start `factorio/entrypoint.sh` copies the list to
+  `data/factorio/mods/`, downloads the newest release of each enabled mod that fits the server's
+  Factorio version, and refuses to start while one is missing. Downloads need a factorio.com
+  account: `FACTORIO_USERNAME` and `FACTORIO_TOKEN` (from https://factorio.com/profile) in `.env`.
+  Players get the same mods automatically when they join. To add a mod, add it and its required
+  dependencies to the list. To remove one, set `"enabled": false` (Factorio enables zips in
+  `mods/` that are not listed). Changing mods on an existing map can break it.
+- **No Space Age:** Nullius is incompatible with Space Age and Quality, so `DLC_SPACE_AGE` is
+  `"false"` and players don't need the DLC.
 - **RCON:** host port 27030. The password is generated on first start in
   `data/factorio/config/rconpw`.
 - **Admins:** `data/factorio/config/server-adminlist.json`.
-- A new map is generated on first start when `data/factorio/saves/` is empty.
+- A new map is generated on first start when `data/factorio/saves/` is empty. Nullius needs a
+  new map, so move old saves aside first (`mv data/factorio/saves data/factorio/saves.old`).
 - **Backups:** see [Backups](#backups).
 
 ## Satisfactory

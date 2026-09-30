@@ -1,0 +1,17 @@
+{
+  "mods": [
+    { "name": "base", "enabled": true },
+
+    { "name": "far-reach", "enabled": true },
+
+    { "name": "nullius", "enabled": true },
+    { "name": "alien-biomes", "enabled": true },
+    { "name": "alien-biomes-graphics", "enabled": true },
+    { "name": "angelsrefininggraphics", "enabled": true },
+    { "name": "angelssmeltinggraphics", "enabled": true },
+    { "name": "angelspetrochemgraphics", "enabled": true },
+    { "name": "boblogistics", "enabled": true },
+    { "name": "boblibrary", "enabled": true },
+    { "name": "configurable-valves", "enabled": true }
+  ]
+}

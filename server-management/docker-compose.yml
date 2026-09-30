@@ -143,14 +143,25 @@ services:
     container_name: pluslan-factorio
     restart: unless-stopped
 
+    # Installs factorio/mod-list.json, downloads the mods and refuses to start while one is
+    # missing, then runs the image's entrypoint. Details: factorio/entrypoint.sh
+    entrypoint: ["bash", "/pluslan-entrypoint.sh"]
+
     environment:
       # The entrypoint chowns /factorio to PUID:PGID, including the mounted settings file,
       # so use the host's first user (same as Satisfactory) to keep the repo file editable.
       PUID: "1000"
       PGID: "1000"
 
-      # With Space Age enabled every player needs the DLC; set "false" for base game only.
-      DLC_SPACE_AGE: "true"
+      # Nullius is incompatible with Space Age and Quality, so base game only (no DLC needed).
+      DLC_SPACE_AGE: "false"
+
+    # factorio.com account for the mod downloads (newest release for this Factorio version).
+    secrets:
+      - source: factorio_username
+        target: username
+      - source: factorio_token
+        target: token
 
     ports:
       - "34197:34197/udp"
@@ -164,6 +175,11 @@ services:
       - ./data/factorio:/factorio
       # Not :ro: the entrypoint's chown would fail on a read-only mount and abort startup.
       - ./factorio/server-settings.json:/factorio/config/server-settings.json
+      # Mounted outside /factorio, so the image's chown doesn't hit them.
+      - ./factorio/entrypoint.sh:/pluslan-entrypoint.sh:ro
+      # Copied into data/factorio/mods/ on every start. Dependencies are not resolved, so they
+      # are listed too.
+      - ./factorio/mod-list.json:/mod-list.json:ro
 
 
   # ============================================================
@@ -200,3 +216,7 @@ services:
 secrets:
   cs2_rcon_password:
     environment: CS2_RCON_PASSWORD
+  factorio_username:
+    environment: FACTORIO_USERNAME
+  factorio_token:
+    environment: FACTORIO_TOKEN
