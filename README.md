@@ -4,7 +4,7 @@ Infrastructure as code for the PLUS-LAN server (Ubuntu).
 
 - **Ansible** configures the OS: base packages, Docker Engine and the Docker Compose plugin.
 - **Docker Compose** runs the game servers: 2× Counter-Strike 2, Minecraft (Paper + BlueMap),
-  Satisfactory and Factorio (with the Nullius and Far Reach mods), plus an hourly backup service for the Minecraft, Factorio and
+  Satisfactory, Factorio (with the Nullius and Far Reach mods) and a TeamSpeak 3 voice server, plus an hourly backup service for the Minecraft, Factorio and
   Satisfactory worlds. See [server-management/SETUP.md](server-management/SETUP.md).
 
 ```

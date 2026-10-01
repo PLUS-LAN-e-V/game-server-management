@@ -29,6 +29,7 @@ Start or stop single services with `docker compose up -d <service>` / `docker co
 | `minecraft` | 25565 | BlueMap http://\<server-ip\>:8100 | RCON only inside the Compose network |
 | `satisfactory` | 7777 tcp+udp, 8888 tcp | – | |
 | `factorio` | 34197 udp | RCON 27030/tcp | |
+| `teamspeak` | 9987 udp, 30033 tcp | ServerQuery only inside the container | TeamSpeak 3, file transfer on 30033 |
 | `backup` | – | – | Hourly backups of Minecraft, Factorio and Satisfactory |
 
 ## Counter-Strike 2
@@ -94,9 +95,28 @@ server in-game and sets the admin password.
   `data/satisfactory/backups/` on every container start, but it overwrites files of the same
   name and keeps no history.
 
+## TeamSpeak 3
+
+Official `teamspeak:3.13` image with its default SQLite database. Players connect to
+`<server-ip>` (default port 9987).
+
+- **Admin rights:** on first start the server prints a privilege key (`token=...`) and the
+  ServerQuery login (`serveradmin` / password). Both are shown only once, so note them down:
+  ```bash
+  docker logs pluslan-teamspeak 2>&1 | grep -E 'token=|password='
+  ```
+  Connect with the TeamSpeak client and redeem the key under *Permissions → Use Privilege Key*
+  to become Server Admin.
+- **Data:** database (channels, permissions, bans), server identity, uploaded files and logs
+  live in `data/teamspeak/`. Deleting it resets the server and generates a new key.
+- **ServerQuery** (10011/tcp) is not published. To use a query tool, add
+  `- "10011:10011/tcp"` to the service's ports.
+- **License:** without a license file the server allows 32 slots, which is the free limit.
+- Not covered by the `backup` service.
+
 ## Backups
 
-CS2 servers are disposable and not backed up. Minecraft, Factorio and Satisfactory are
+CS2 servers are disposable and not backed up, nor is TeamSpeak. Minecraft, Factorio and Satisfactory are
 persistent worlds and are backed up by one coordinator service, `backup` (script: `backup/backup.sh`). It runs all
 the time: first backup 5 minutes after it starts, then at every full hour.
 

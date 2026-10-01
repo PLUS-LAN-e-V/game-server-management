@@ -183,6 +183,31 @@ services:
 
 
   # ============================================================
+  # TeamSpeak 3
+  # ============================================================
+
+  teamspeak:
+    image: teamspeak:3.13
+    container_name: pluslan-teamspeak
+    restart: unless-stopped
+
+    environment:
+      TS3SERVER_LICENSE: "accept"
+
+    ports:
+      # Voice.
+      - "9987:9987/udp"
+      # File transfer (channel files, avatars, icons).
+      - "30033:30033/tcp"
+      # ServerQuery (10011/tcp) is intentionally not published.
+
+    # SQLite database, server identity, logs and uploaded files. The admin privilege key and
+    # the ServerQuery password are printed once on first start: docker logs pluslan-teamspeak
+    volumes:
+      - ./data/teamspeak:/var/ts3server
+
+
+  # ============================================================
   # Backup coordinator (Minecraft, Factorio, Satisfactory)
   #
   # Hourly at the full hour, skipped while nobody played. Keeps every backup from the
